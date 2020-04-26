@@ -52,11 +52,14 @@ tele1<-tele[,colMeans(is.na(tele))<=0.15]
 View(tele1)
 names(tele1)
 
-#drop_blk_Mean=blck_dat_Mean+drop_dat_Mean+drop_vce_Mean #hence omit
+# drop_blk_Mean=blck_dat_Mean+drop_dat_Mean+drop_vce_Mean,
+# hence omitting var drop_blk_Mean 
 tele1<-tele1[,-6]
 
-#Data exploration-profiling-continous var as dat & categoriacal var as datc
-#deciling continous var on basis of churn
+# Data exploration-profiling-continous var as dat & categoriacal var as datc
+
+# deciling continous var on basis of churn :
+               `                                                           
 #mou_Mean
 summary(tele1$mou_Mean)
 tele1%>%mutate(dec=ntile(tele1$mou_Mean,10))%>%count(churn,dec)%>%filter(churn==1)->dat1
@@ -795,7 +798,7 @@ tele1$avg6qty[is.na(tele1$avg6qty)]<-mean(tele1$avg6qty,na.rm=T)
 tele1$hnd_price[is.na(tele1$hnd_price)]<-mean(tele1$hnd_price,na.rm=T)
 
 
-#create seperate category "missing for factor variables
+#create seperate category "missing" for factor variables
 
 #prizm_social_one
 tele1$prizm_social_one_1<-ifelse(is.na(tele1$prizm_social_one),"Missing",as.factor(tele1$prizm_social_one))
@@ -823,7 +826,7 @@ names(tele1)
 table(tele$churn)/nrow(tele)
 table(tele1$churn)/nrow(tele1)
 
-#convert to factprs and create dummy var-age1,age2,models,hnd_price,actvsubs,uniqsubs,
+#convert to factors and create dummy var-age1,age2,models,hnd_price,actvsubs,uniqsubs,
 #forgntvl,mtrcycle,truck,churn,Customer_ID
 #age1
 str(tele1$age1)
@@ -1044,7 +1047,7 @@ test$age2_1_midleage<-ifelse(test$age2_1=="Middle-age",1,0)
 train$age2_1_old<-ifelse(train$age2_1=="Old",1,0)
 test$age2_1_old<-ifelse(test$age2_1=="Old",1,0)
 
-#rerun model with sig var
+# rerun model with sig var
 names(train)
 mod1<-glm(churn~ mou_Mean + totmrc_Mean +  rev_Range + mou_Range            
          + change_mou + drop_vce_Range + owylis_vce_Range + mou_opkv_Range      
@@ -1172,6 +1175,225 @@ targeted<- test[test$prob>0.27 & test$prob<0.85 & test$churn=="1","Customer_ID"]
 targeted<-as.data.frame(targeted)
 nrow(targeted)
 # 4137 customers likely to churn!
+
+### ********** Answering Business Questions ********** ###
+### Top Line Questions of Interest to Senior Management: 
+
+#  1.  What are the top five factors driving likelihood of churn at Mobicom?
+head(sort(abs(mod3$coefficients),decreasing = T),10)
+summary(mod3)
+
+# from the summary of my final model, "mod3".
+
+## The model results show that the top 5 factors affecting churn are:
+### a. unq_7            with beta coefficient of 0.735625538
+### b. retdays_1        with beta coefficient of 0.670774312
+### c. ethnic_O         with beta coefficient of 0.313047896
+### d. area_nrthwst     with beta coefficient of 0.283039470
+### e. area_southflrda  with beta coefficient of 0.272490954
+
+# The 1st factor explains, with a unit increase in level 7 of variable uniqsubs, there is 0.735625538 unit increase
+# in churn.
+# The 2nd Factor explains, with a unit increase in variable retdays, there is 0.670774312 unit increase in churn.
+# Same explaination applies to the next 3 variables.
+# var ethnic_O represents var ethnic with level o, var area_nrthwst is NORTHWEST/ROCKY MOUNTAIN AREA, and 
+# var area_southflrda represents var SOUTH FLORIDA AREA, Var retdays_1 represents valid values for var retdays,i.e.
+# values more than "0"
+
+# Thus family bundles should be rolled out for families with 7 unique subscribers. Special offers should be given
+# to customers who makes retention calls, at the earliest as per their grieviances. Special plans should be rolled out for 
+# people with Asian Ethnicity. Special special plans should be rolled out for customers located in NORTHWEST/ROCKY 
+# MOUNTAIN AREA and SOUTH FLORIDA AREA. 
+
+
+#   2.  Validation of survey findings. 
+# a) Whether "cost and billing" and "network and service quality" are important factors influencing churn behaviour.  
+
+# The following variables explain "cost and billing" and "network and service quality"
+
+# Variables totmrc_Mean i.e. 'base plan charge' representing cost to customer, 
+# var rev_Range i.e. 'Range of Revenue(charge amount)' representing billing amount,
+# var ovrrev_Mean = DATOVR_MEAN + VCEOVR_MEAN i.e. 'Mean overage revenue' (It is the sum of data and voice 
+# overage revenues) representing the overage revenue earned from customers after billing the same to them.   
+# and var  totrev i.e. 'Total revenue' representing total revenue earned from customers.
+
+
+# var totmrc_Mean has beta coefficient value of -0.005294251 meaning a unit increase in this variable is causing 
+# decrease in churn by 0.005294251/unit.
+
+# var rev_Range has beta coefficient value of 0.002095208 meaning a unit increase in this variable is causing 
+# increase in churn by 0.002095208/unit
+
+# var ovrrev_Mean has beta coefficient value of 0.007265908 meaning a unit increase in this variable is causing 
+# increase in churn by 0.007265908/unit
+
+# var totrev has beta coefficient value of 0.000197018 meaning a unit increase in this variable is causing 
+# increase in churn by 0.000197018/unit
+
+# Having said that, if we notice above mentioned beta values, a unit increase in them is having almost 0% impact 
+# on churn. SO it seems cost and billing is not very important factors here influencing churn behaviour at Mobicom.
+
+
+
+# The following variables explain "network and service quality" 
+
+# VARIABLE          BETA COEFFICIENT
+
+# mou_Range         0.000300765
+# change_mou       -0.000653979
+# drop_blk_Mean     0.007668757
+# drop_vce_Range    0.018691566 
+# mou_opkv_Range   -0.001117168 
+# iwylis_vce_Mean  -0.015130015
+# avgqty            0.001032554 
+# avg6mou          -0.000327649
+# adjmou            0.000014846
+# retdays_1         0.670774312
+# complete_Mean    -0.001719650
+
+
+# From the above statistics, data explains the following:
+
+# Variables mou_Range 1.e. with a unit increase in 'Range of number of minutes of use', 
+#       there is increase in Churn by 0.000300765 units.
+# var change_mou i.e. with a unit increase in 'Percentage change in monthly minutes of 
+#     use vs previous three month average, there is decrease in Churn by -0.000653979 units.
+# var drop_blk_Mean i.e. with unit increase in 'Mean number of dropped or blocked calls', 
+#     there is an increase in churn by 0.007668757 units
+# var drop_vce_Range i.e. with a unit increase in 'Range of number of dropped (failed) voice calls', 
+#     there is an increase in Churn by 0.018691566 units.
+# var mou_opkv_Range  i.e. with a unit increase in  'Range of unrounded minutes of use of 
+#     off-peak voice calls, there is a decrease in Churn by -0.001117168 units.
+# var iwylis_vce_Mean i.e. with a unit increase in 'Mean number of inbound wireless to wireless voice calls',
+#     there is a decrease in churn by -0.015130015 units.
+# var avgqty i.e. with a unit increase in 'Average monthly number of calls over the life of the customer',
+#     there is an increase in Churn by 0.001032554 units.
+# var avg6mou i.e. with unit increase in 'Average monthly minutes of use over the previous six months',
+#     there is a decrease in Churn by -0.000327649 units.
+# var adjmou i.e. with unit increase in  'Billing adjusted total minutes of use over the life of the customer',
+#     there is an increase in Churn by 0.000014846 units.
+# var retdays_1 representing values captured in the variable retdays i.e. with a unit increase in 
+#     'Number of days since last retention call', there is an increase in Churn by 0.000014846 units.
+#     This variable is probably explaining the service quality of the company.
+# var complete_Mean i.e. with unit increase in 'Mean number of completed voice and data calls' 
+#     there is a decrease in Churn by -0.001719650 units
+
+# Of the above variables, the beta coefficient of variable retdays_1 is expressing a very important 
+# factor influencing Churn behaviour. That is  with the increase in the number of days since a customer 
+# makes a retention call, the customer's chances of churning is very high. This could probably be because
+# their grieviances are not being catered to properly. These customers should be paid more attention to and 
+# special offers should be made to them depending upon their grieviances.
+
+
+ 
+
+#  2b) Are data usage connectivity issues turning out to be costly? In other words, is it leading to churn? 
+
+#   comp_dat_Mean - Mean no. of completed data calls. 
+#   plcd_dat_Mean - Mean number of attempted data calls placed
+#   opk_dat_Mean - Mean number of off-peak data calls
+#   blck_dat_Mean - Mean no. of blocked / failed data calls
+#   datovr_Mean - Mean revenue of data overage. 
+#   datovr_Range - Range of revenue of data overage
+#   drop_dat_Mean - Mean no. of dropped / failed data calls
+
+#   The above variables express data usage connectivity. 
+quantile(tele$plcd_dat_Mean,prob=c(0.10,0.20,0.30,0.40,0.50,0.60,0.70,0.80,0.82,0.84,0.85,0.90,1))
+
+#   The Data Quality Report for all the above variables show that only 10% to 15% customers are actualy 
+#   making data calls or using the internet. 
+#   This could be a matter of concern since the global market survey report shows "Subscribers who 
+#   have switched operators in recent months reported two key information sources in their decision:
+#   the Internet and recommendation of family and friends.. 
+#   In this case it seems customers are not really using the internet. So it would be good to work 
+#   towards attaining more customers to use data and also towards proving quality network connectivity
+#   and service to provide maximum customer satisfaction and reduce Churn.
+#   Since there is not enough usable data for the above variables they are not showing any influence 
+#   on the Churn Behaviour at Mobicom.
+
+
+
+
+#   3. Would you recommend rate plan migration as a proactive retention strategy?
+
+#   Variable ovrrev_Mean has beta coefficient of 0.007265908. 
+#   var ovrrev_Mean = DATOVR_MEAN + VCEOVR_MEAN i.e. 'Mean overage revenue' 
+#   It is the sum of data and voice overage revenues representing the overage revenue earned 
+#   from customers after billing the same to them. 
+#   The Beta coefficient is not showing a strong impact of overage billing as an influencer 
+#   of churn behaviour. 
+#   Though this might be a matter of concern for few individual customers and they could be 
+#   catered to on case to case basis. But overall rate plan migration as a proactive retention strategy
+#   might not help much at Mobicom.
+
+
+#   4. What would be your recommendation on how to use this churn model for prioritisation
+#   of customers for a proactive retention campaigns in the future?
+
+# Solution:
+#Gains Chart
+library(gains)
+gains(test$churn,predict(mod3,type="response",newdata=test),groups = 10)
+#the Gains Chart shows that the top 20% of the probabilities contain 29.5% customers that are highly likely to churn.
+
+
+# Selecting Customers with high churn rate
+test$prob<-predict(mod3,type="response",newdata=test)
+quantile(test$prob,prob=c(0.10,0.20,0.30,0.40,0.50,0.60,0.70,0.80,0.90,1))
+
+# Top 20% of the probabilities lie between 0.3042058 and 0.7529329
+
+# Applying cutoff value to predict customers who Will Churn
+pred4<-predict(mod3, type="response", newdata=test)
+pred4<-ifelse(pred4>=0.3042058 , 1, 0)
+table(pred4,test$churn)
+
+Targeted<-test[test$prob>0.3042058 & test$prob<=0.7529329 & test$churn=="1","Customer_ID"]
+Targeted<-as.data.frame(Targeted)
+nrow(Targeted)
+
+write.csv(Targeted,"Target_Customers.csv",row.names = F)
+
+#   Thus Using the model can be used to predict customers with high probability of Churn and extract the 
+#   target list using their "Customer ID". 
+
+
+
+# 5. What would be the target segments for proactive retention campaigns? 
+# Falling ARPU forecast is also a concern and therefore, Mobicom would like to save their high revenue 
+# customers besides managing churn. Given a budget constraint of a contact list of 20% of the subscriber pool, 
+# which subscribers should prioritized if "revenue saves" is also a priority besides controlling churn. 
+# In other words, controlling churn is the primary objective and revenue saves is the secondary objective.
+
+# Solution:
+pred5<-predict(mod3, type="response", newdata=test)
+test$prob<-predict(mod3,type="response",newdata=test)
+quantile(test$prob,prob=c(0.10,0.20,0.30,0.40,0.50,0.60,0.70,0.80,0.90,1))
+pred6<-ifelse(pred5<0.20,"Low_Score",ifelse(pred5>=0.20 & pred5<0.30,"Medium_Score","High_Score"))
+table(pred6,test$churn)
+
+str(test$totrev)
+quantile(test$totrev,prob=c(0.10,0.20,0.30,0.40,0.50,0.60,0.70,0.80,0.90,1))
+Revenue_Levels<-ifelse(test$totrev<670.660,"Low_Revenue",ifelse(test$totrev>=670.660 & 
+                                                                  test$totrev<1034.281,"Medium_Revenue","High_Revenue"))
+
+table(Revenue_Levels)
+
+table(pred6,Revenue_Levels)
+
+##  Thus this table can be used to select the levels of customers are to be targeted
+##  and the Target list can be extracted as follows:
+
+test$prob_levels<-ifelse(pred5<0.20,"Low_Score",ifelse(pred5>=0.20 & pred5<0.30,"Medium_Score","High_Score"))
+test$Revenue_Levels<-ifelse(test$totrev<670.660,"Low_Revenue",ifelse(test$totrev>=670.660 & 
+                                                                  test$totrev<1034.281,"Medium_Revenue","High_Revenue"))
+
+Targeted1<-test[test$prob_levels=="High_Score" & test$Revenue_Levels=="High_Revenue","Customer_ID"]
+Targeted1<-as.data.frame(Targeted1)
+nrow(Targeted1)
+
+write.csv(Targeted1,"High_Revenue_Target_Customers.csv",row.names = F)
+
 
 
 
