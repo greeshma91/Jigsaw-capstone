@@ -14,19 +14,19 @@ outlier treatment.
 Logistic Regression.
 
 Role :
-Understanding the whole documentation of the business problem and acquiring knowledge about each attributes in the given dataset.
-Derived variable to use correct parameter for Network and service quality and Whether customers are on optimal plan or not.
-Cleaning data,Deleted all the columns where only 10% of information was given.
-Outlier Treatment,Profiling of each variable to impute missing values where required.
-Built logistic regression model using backward selection algorithm and validated it. 
-Predicted churn rate for each customer.
+# Understanding the whole documentation of the business problem and acquiring knowledge about each attributes in the given dataset.
+# Derived variable to use correct parameter for Network and service quality and Whether customers are on optimal plan or not.
+# Cleaning data,Deleted all the columns where only 10% of information was given.
+# Outlier Treatment,Profiling of each variable to impute missing values where required.
+# Built logistic regression model using backward selection algorithm and validated it. 
+# Predicted churn rate for each customer.
 
 Suggestion given to client:
-Roll out family bundles for families with 7 unique subscribers. 
-Roll out plans and special offers for customers who makes retention calls at the earliest as per their grieviances.
-Roll out special offers for people with Asian Ethnicity.
-Roll out special plans for customers located in NORTHWEST/ROCKY MOUNTAIN AREA and SOUTH FLORIDA AREA. 
-Roll out plans to increase data usage by customers is very important.
-Roll out rate plan migration strategy for customers with high churn and high overage revenue.
-Roll out offers for high monthly usage users and high churn rate
+# Roll out family bundles for families with 7 unique subscribers. 
+# Roll out plans and special offers for customers who makes retention calls at the earliest as per their grieviances.
+# Roll out special offers for people with Asian Ethnicity.
+# Roll out special plans for customers located in NORTHWEST/ROCKY MOUNTAIN AREA and SOUTH FLORIDA AREA. 
+# Roll out plans to increase data usage by customers is very important.
+# Roll out rate plan migration strategy for customers with high churn and high overage revenue.
+# Roll out offers for high monthly usage users and high churn rate
 
