@@ -8,10 +8,10 @@ Data Details:
 The data given had 86 attributes of 66297 records, each describing overall usage of each customers,their demo graphic information and if they have unsubscribed their service or not as the churn column.
 
 Techniques Used:
-Descriptive Statistics.
-Missing value treatment.
-outlier treatment.
-Logistic Regression.
+1) Descriptive Statistics.
+2) Missing value treatment.
+3) outlier treatment.
+4) Logistic Regression.
 
 Role :
 1) Understanding the whole documentation of the business problem and acquiring knowledge about each attributes in the given dataset.
